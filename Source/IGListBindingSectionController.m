@@ -13,9 +13,6 @@
 #import <IGListKit/IGListDiffable.h>
 #import <IGListKit/IGListDiff.h>
 #import <IGListKit/IGListBindable.h>
-#import <IGListKit/IGListAdapterUpdater.h>
-
-#import "IGListArrayUtilsInternal.h"
 
 typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
     IGListDiffingSectionStateIdle = 0,
@@ -28,7 +25,8 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
 @property (nonatomic, strong, readwrite) NSArray<id<IGListDiffable>> *viewModels;
 
 @property (nonatomic, strong) id object;
-@property (nonatomic, assign) IGListDiffingSectionState state;
+//@property (nonatomic, assign) IGListDiffingSectionState state;
+@property (nonatomic, strong) id queuedObject;
 
 @end
 
@@ -38,31 +36,24 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
 
 - (void)updateAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
     IGAssertMainThread();
-
-    if (self.state != IGListDiffingSectionStateIdle) {
-        if (completion != nil) {
-            completion(NO);
-        }
-        return;
-    }
-    self.state = IGListDiffingSectionStateUpdateQueued;
+    
+    id<IGListDiffable> object = self.object;
+    self.queuedObject = object;
 
     __block IGListIndexSetResult *result = nil;
     __block NSArray<id<IGListDiffable>> *oldViewModels = nil;
 
     id<IGListCollectionContext> collectionContext = self.collectionContext;
     [self.collectionContext performBatchAnimated:animated updates:^(id<IGListBatchContext> batchContext) {
-        if (self.state != IGListDiffingSectionStateUpdateQueued) {
+        if (object != self.queuedObject) {
             return;
         }
         
         oldViewModels = self.viewModels;
 
-        id<IGListDiffable> object = self.object;
         IGAssert(object != nil, @"Expected IGListBindingSectionController object to be non-nil before updating.");
         
-        NSArray *newViewModels = [self.dataSource sectionController:self viewModelsForObject:object];
-        self.viewModels = objectsWithDuplicateIdentifiersRemoved(newViewModels);
+        self.viewModels = [self.dataSource sectionController:self viewModelsForObject:object];
         result = IGListDiff(oldViewModels, self.viewModels, IGListDiffEquality);
         
         [result.updates enumerateIndexesUsingBlock:^(NSUInteger oldUpdatedIndex, BOOL *stop) {
@@ -75,7 +66,6 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
             }
         }];
         
-        
         [batchContext deleteInSectionController:self atIndexes:result.deletes];
         [batchContext insertInSectionController:self atIndexes:result.inserts];
         
@@ -83,9 +73,8 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
             [batchContext moveInSectionController:self fromIndex:move.from toIndex:move.to];
         }
         
-        self.state = IGListDiffingSectionStateUpdateApplied;
+        self.queuedObject = nil;
     } completion:^(BOOL finished) {
-        self.state = IGListDiffingSectionStateIdle;
         if (completion != nil) {
             completion(YES);
         }
@@ -113,8 +102,8 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
     id oldObject = self.object;
     self.object = object;
 
-    if (oldObject == nil) {
-        self.viewModels = [[self.dataSource sectionController:self viewModelsForObject:object] copy];
+    if (oldObject == nil || self.collectionContext == nil) {
+        self.viewModels = [self.dataSource sectionController:self viewModelsForObject:object];
     } else {
         IGAssert([oldObject isEqualToDiffableObject:object],
                  @"Unequal objects %@ and %@ will cause IGListBindingSectionController to reload the entire section",
@@ -131,20 +120,6 @@ typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
     id<IGListBindingSectionControllerSelectionDelegate> selectionDelegate = self.selectionDelegate;
     if ([selectionDelegate respondsToSelector:@selector(sectionController:didDeselectItemAtIndex:viewModel:)]) {
         [selectionDelegate sectionController:self didDeselectItemAtIndex:index viewModel:self.viewModels[index]];
-    }
-}
-
-- (void)didHighlightItemAtIndex:(NSInteger)index {
-    id<IGListBindingSectionControllerSelectionDelegate> selectionDelegate = self.selectionDelegate;
-    if ([selectionDelegate respondsToSelector:@selector(sectionController:didHighlightItemAtIndex:viewModel:)]) {
-        [selectionDelegate sectionController:self didHighlightItemAtIndex:index viewModel:self.viewModels[index]];
-    }
-}
-
-- (void)didUnhighlightItemAtIndex:(NSInteger)index {
-    id<IGListBindingSectionControllerSelectionDelegate> selectionDelegate = self.selectionDelegate;
-    if ([selectionDelegate respondsToSelector:@selector(sectionController:didUnhighlightItemAtIndex:viewModel:)]) {
-        [selectionDelegate sectionController:self didUnhighlightItemAtIndex:index viewModel:self.viewModels[index]];
     }
 }
 
