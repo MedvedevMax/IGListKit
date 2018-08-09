@@ -12,6 +12,8 @@
 #import <IGListKit/IGListDiff.h>
 #import <IGListKit/IGListBindable.h>
 
+#import "IGListArrayUtilsInternal.h"
+
 typedef NS_ENUM(NSInteger, IGListDiffingSectionState) {
     IGListDiffingSectionStateIdle = 0,
     IGListDiffingSectionStateUpdateQueued,
