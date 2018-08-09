@@ -1,10 +1,8 @@
 /**
  * Copyright (c) 2016-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 #import "IGListIndexPathResult.h"
@@ -86,8 +84,8 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ %p; %zi inserts; %zi deletes; %zi updates; %zi moves>",
-            NSStringFromClass(self.class), self, self.inserts.count, self.deletes.count, self.updates.count, self.moves.count];
+    return [NSString stringWithFormat:@"<%@ %p; %lu inserts; %lu deletes; %lu updates; %lu moves>",
+            NSStringFromClass(self.class), self, (unsigned long)self.inserts.count, (unsigned long)self.deletes.count, (unsigned long)self.updates.count, (unsigned long)self.moves.count];
 }
 
 @end

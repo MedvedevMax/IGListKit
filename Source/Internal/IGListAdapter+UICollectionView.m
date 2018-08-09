@@ -1,10 +1,8 @@
 /**
  * Copyright (c) 2016-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 #import "IGListAdapter+UICollectionView.h"
@@ -25,10 +23,10 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     IGListSectionController * sectionController = [self sectionControllerForSection:section];
-    IGAssert(sectionController != nil, @"Nil section controller for section %zi for item %@. Check your -diffIdentifier and -isEqual: implementations.",
-            section, [self.sectionMap objectForSection:section]);
+    IGAssert(sectionController != nil, @"Nil section controller for section %li for item %@. Check your -diffIdentifier and -isEqual: implementations.",
+             (long)section, [self.sectionMap objectForSection:section]);
     const NSInteger numberOfItems = [sectionController numberOfItems];
-    IGAssert(numberOfItems >= 0, @"Cannot return negative number of items %zi for section controller %@.", numberOfItems, sectionController);
+    IGAssert(numberOfItems >= 0, @"Cannot return negative number of items %li for section controller %@.", (long)numberOfItems, sectionController);
     return numberOfItems;
 }
 

@@ -1,10 +1,8 @@
 /**
  * Copyright (c) 2016-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 #import <IGListKit/IGListAdapter.h>
@@ -20,8 +18,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// Generate a string representation of a reusable view class when registering with a UICollectionView.
-NS_INLINE NSString *IGListReusableViewIdentifier(Class viewClass, NSString * _Nullable nibName, NSString * _Nullable kind) {
-    return [NSString stringWithFormat:@"%@%@%@", kind ?: @"", nibName ?: @"", NSStringFromClass(viewClass)];
+NS_INLINE NSString *IGListReusableViewIdentifier(Class viewClass, NSString * _Nullable nibName, NSString * _Nullable kind, NSString * _Nullable givenReuseIdentifier) {
+    return [NSString stringWithFormat:@"%@%@%@%@", kind ?: @"", nibName ?: @"", givenReuseIdentifier ?: @"", NSStringFromClass(viewClass)];
 }
 
 @interface IGListAdapter ()
