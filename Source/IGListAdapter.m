@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-present, Facebook, Inc.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -94,7 +94,7 @@
 
         // dump old registered section controllers in the case that we are changing collection views or setting for
         // the first time
-        _registeredCellClasses = [NSMutableSet new];
+        _registeredCellIdentifiers = [NSMutableSet new];
         _registeredNibNames = [NSMutableSet new];
         _registeredSupplementaryViewIdentifiers = [NSMutableSet new];
         _registeredSupplementaryViewNibNames = [NSMutableSet new];
@@ -955,10 +955,10 @@
     IGParameterAssert(index >= 0);
     UICollectionView *collectionView = self.collectionView;
     IGAssert(collectionView != nil, @"Dequeueing cell of class %@ with reuseIdentifier %@ from section controller %@ without a collection view at index %li", NSStringFromClass(cellClass), reuseIdentifier, sectionController, (long)index);
-    NSString *identifier = IGListReusableViewIdentifier(cellClass, nil, nil, reuseIdentifier);
+    NSString *identifier = IGListReusableViewIdentifier(cellClass, nil, reuseIdentifier);
     NSIndexPath *indexPath = [self indexPathForSectionController:sectionController index:index usePreviousIfInUpdateBlock:NO];
-    if (![self.registeredCellClasses containsObject:cellClass]) {
-        [self.registeredCellClasses addObject:cellClass];
+    if (![self.registeredCellIdentifiers containsObject:identifier]) {
+        [self.registeredCellIdentifiers addObject:identifier];
         [collectionView registerClass:cellClass forCellWithReuseIdentifier:identifier];
     }
     return [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
@@ -1012,7 +1012,7 @@
     IGParameterAssert(index >= 0);
     UICollectionView *collectionView = self.collectionView;
     IGAssert(collectionView != nil, @"Dequeueing cell of class %@ from section controller %@ without a collection view at index %li with supplementary view %@", NSStringFromClass(viewClass), sectionController, (long)index, elementKind);
-    NSString *identifier = IGListReusableViewIdentifier(viewClass, nil, elementKind, nil);
+    NSString *identifier = IGListReusableViewIdentifier(viewClass, elementKind, nil);
     NSIndexPath *indexPath = [self indexPathForSectionController:sectionController index:index usePreviousIfInUpdateBlock:NO];
     if (![self.registeredSupplementaryViewIdentifiers containsObject:identifier]) {
         [self.registeredSupplementaryViewIdentifiers addObject:identifier];
